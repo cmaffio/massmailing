@@ -7,8 +7,6 @@ use Switch;
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
 
-#$db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password);
-
 my $destinatario;
 my $action;
 my $status;
@@ -55,7 +53,8 @@ while (<>) {
 		next;
 	}
 
-	if (/^Message-Id: <(\d+)\.(\d+)\@smtpmr\.esseweb\.eu>/) {
+	$server_id = $conf{'server_id'};
+	if (/^Message-Id: <(\d+)\.(\d+)\@$server_id>/) {
 		$id_user = $1;
 		$message_id = $2;
 		next;
@@ -68,8 +67,6 @@ while (<>) {
 }
 
 my $sql = "SELECT invii.id FROM invii JOIN destinatari ON invii.id_destinatari = destinatari.id WHERE message_id = '$id_user.$message_id' AND destinatari.indirizzo = '$destinatario' AND invii.stato IN (0, -1)";
-
-#save_query ($sql);
 
 my $sth = $db->prepare($sql);
 $sth->execute();
@@ -94,24 +91,10 @@ if ($numrows == 1) {
 					id = $id_user
 		";
 
-#		my $sql = "UPDATE destinatari SET errori = errori + 1, data_mod = NOW()  WHERE id = $id_user";
 		$sth = $db->prepare($sql);
 		$sth->execute();
 
-
-		
-
 	}
-}
-
-sub save_query {
-	my $query = shift;
-
-	open LOG, ">> $file_log";
-
-	print LOG "$query\n";
-	close LOG;
-
 }
 
 sub AddSlashes {

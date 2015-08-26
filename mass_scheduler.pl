@@ -8,8 +8,6 @@ use String::Random;
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
 
-#$db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password);
-
 my $sql = "SELECT id, id_ricezioni, numero, messageid, stato FROM scheduler WHERE data_invio <= NOW() AND stato BETWEEN 1 AND 9";
 
 my $sth = $db->prepare($sql);
@@ -57,9 +55,9 @@ sub invio {
 
 				my $messageid = "$id_destinatari.$messageid";
 		
-				my $smtp = new Net::SMTP_auth('smtpmr.mi.esseweb.intra');
+				my $smtp = new Net::SMTP_auth($conf{'smtp_server'});
 				$smtp->auth ('PLAIN', $sender, $pwd);
-				$smtp->mail('reply@smtpmr.esseweb.eu');
+				$smtp->mail('reply@'.$conf{'server_id'});
 				$smtp->recipient($indirizzo, { Notify => ['SUCCESS','FAILURE','DELAY'], SkipBad => 1 });
 		
 				$smtp->data();
@@ -67,7 +65,7 @@ sub invio {
 				$smtp->datasend("To: \"$nome\" <$indirizzo> \n");
 				$smtp->datasend("From: <$sender> \n");
 				$smtp->datasend("Subject: $oggetto\n");
-				$smtp->datasend("Message-Id: <$messageid\@smtpmr.esseweb.eu>\n");
+				$smtp->datasend("Message-Id: <$messageid\@".$conf{'server_id'}.">\n");
 				$smtp->datasend("Content-Transfer-Encoding: $cte\n") if ($cte ne "");
 				$smtp->datasend("Content-Type: $ct\n") if ($ct ne "");
 
@@ -78,8 +76,6 @@ sub invio {
 				$smtp->datasend("\n");
 				$smtp->dataend();
 				$smtp->quit;
-
-
 
 				$sql = "INSERT INTO invii (id_utenze, id_ricezione, id_destinatari, data, message_id, stato, id_scheduler) VALUES ($id_utenze, $id_ricezione, $id_destinatari, NOW(), '$messageid', 0, $id_scheduler)";
 				my $sth1 = $db->prepare($sql);

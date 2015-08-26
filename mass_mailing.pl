@@ -8,9 +8,6 @@ use String::Random;
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
 
-#$db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password,{ RaiseError => 1, AutoCommit => 0 });
-#$db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password);
-
 my $mittente;
 my $destinatario;
 my $oggetto;
