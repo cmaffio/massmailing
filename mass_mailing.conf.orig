@@ -1,0 +1,18 @@
+$db_host		=	'';
+$db_name		=	'';
+$db_user		=	'';
+$db_password		=	'';
+
+$db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password);
+
+my $sql_conf = "SELECT nome, valore FROM conf WHERE attivo = 1";
+
+my $sth_conf = $db->prepare($sql_conf);
+my $numrows = $sth_conf->execute();
+
+%conf = ();
+while (my ($nome, $valore) = $sth_conf->fetchrow_array) {
+	$conf{$nome} = $valore;
+}
+
+return 1;
