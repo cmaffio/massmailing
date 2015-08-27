@@ -45,6 +45,8 @@ while (<>) {
 	if (/^$/) {
 		$body = "";
 		while (<>) {
+			$dimensione += length;
+			print DUMP if ($conf{'debug_mailing'});
 			$body .= $_;
 		}
 		$body = unpack ("H*", $body);
