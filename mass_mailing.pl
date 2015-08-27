@@ -7,6 +7,7 @@ use String::Random;
 
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
+$file_dump = "$Bin/mass_mailing.dump";
 
 my $mittente;
 my $destinatario;
@@ -15,9 +16,12 @@ my $body;
 my $cte;
 my $ct;
 
+open DUMP, "> $file_dump" or die "cannot open < input.txt: $!" if ($conf{'debug_mailing'});
+
 $dimensione = 0;
 while (<>) {
 	$dimensione += length;
+	print DUMP if ($conf{'debug_mailing'});
 	if (/^From: (\".+\" )?<?([\w_\.-]+@[\w\.-]+)>?/) {
 		$mittente = $2;
 	}
@@ -46,6 +50,8 @@ while (<>) {
 		$body = unpack ("H*", $body);
 	}
 }
+
+close DUMP if ($conf{'debug_mailing'});
 
 my $sql = "SELECT id FROM utenze WHERE mail = '$mittente'";
 my $sth = $db->prepare($sql);

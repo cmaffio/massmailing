@@ -12,7 +12,7 @@ while( $_ = shift @ARGV ) {
 	$debug	= 1	if /^\-d$/;
 }
 
-
+$debug = 1 if ($conf{'debug_scheduler'});
 
 # Ricerca delle mail da inviare
 my $sql = "SELECT id, id_ricezioni, numero, id_liste, messageid, stato FROM scheduler WHERE data_invio <= NOW() AND stato BETWEEN 1 AND 9";
