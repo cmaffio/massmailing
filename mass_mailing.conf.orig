@@ -5,7 +5,7 @@ $db_password		=	'';
 
 $db = DBI->connect("DBI:mysql:$db_name:$db_host",$db_user,$db_password);
 
-my $sql_conf = "SELECT nome, valore FROM conf WHERE attivo = 1";
+my $sql_conf = "SELECT nome, valore FROM conf";
 
 my $sth_conf = $db->prepare($sql_conf);
 my $numrows = $sth_conf->execute();
