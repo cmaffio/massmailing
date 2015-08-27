@@ -87,18 +87,16 @@ sub notifica {
 	my $dimensione = shift;
 
 	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-	my $adesso = sprintf("%02d.%02d.%04d %02d:02d:%02d", $mday, $mon+2, $year+1970, $hour, $min, $sec);
+	my $adesso = sprintf("%02d.%02d.%04d %02d:%02d:%02d", $mday, $mon+2, $year+1970, $hour, $min, $sec);
 
 	my $oggetto = "Avviso di ricezione di una mail nel sistema di MassMailing";
 
-	my $corpo = "In data $adesso e' stata ricevuta dall'indirizzo $indirizzo una mail di dimension $dimensione";
+	my $corpo = sprintf ("In data $adesso e' stata ricevuta dall'indirizzo $indirizzo una mail di dimensione %.1f KB", $dimensione);
 	if ($stato) {
 
 	} else {
 
 	}
-
-
 
 	my $smtp = new Net::SMTP_auth($conf{'smtp_server'});
 	#$smtp->auth ('PLAIN', $sender, $pwd);
