@@ -54,6 +54,8 @@ while (<>) {
 }
 
 close DUMP if ($conf{'debug_mailing'});
+notifica ("$mittente");
+
 
 my $sql = "SELECT id FROM utenze WHERE mail = '$mittente'";
 my $sth = $db->prepare($sql);
@@ -72,5 +74,35 @@ if ($numrows == 1) {
 	$sql = "INSERT INTO scheduler (id_utenze, id_ricezioni, stato, inviate, numero, messageid) VALUES ($id, $id_ricezioni, 0, 0, $conf{'blocco'}, $messageid)";
 	$sth = $db->prepare($sql);
 	$sth->execute();
+
+}
+
+sub notifica {
+	my $indirizzo = shift;
+
+	my $oggetto = "Ogetto di test";
+	my $corpo = "Questa e' una mail di prova\nvediamo cosa ne esce\n\nCiao";
+
+	my $smtp = new Net::SMTP_auth($conf{'smtp_server'});
+	#$smtp->auth ('PLAIN', $sender, $pwd);
+	$smtp->mail('no-reply@'.$conf{'server_id'});
+	$smtp->recipient($indirizzo, { Notify => ['SUCCESS','FAILURE','DELAY'], SkipBad => 1 });
+
+	$smtp->data();
+
+	$smtp->datasend("To: $indirizzo \n");
+	$smtp->datasend("From: <no-reply@".$conf{'server_id'}."> \n");
+	$smtp->datasend("Subject: $oggetto\n");
+	#$smtp->datasend("Message-Id: <$messageid\@".$conf{'server_id'}.">\n");
+	#$smtp->datasend("Content-Transfer-Encoding: $cte\n") if ($cte ne "");
+	#$smtp->datasend("Content-Type: $ct\n") if ($ct ne "");
+
+	$smtp->datasend("\n");
+
+	$smtp->datasend($corpo);
+
+	$smtp->datasend("\n");
+	$smtp->dataend();
+	$smtp->quit;
 
 }
