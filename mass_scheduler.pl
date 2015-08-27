@@ -8,23 +8,26 @@ use String::Random;
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
 
-my $sql = "SELECT id, id_ricezioni, numero, messageid, stato FROM scheduler WHERE data_invio <= NOW() AND stato BETWEEN 1 AND 9";
+# Ricerca delle mail da inviare
+my $sql = "SELECT id, id_ricezioni, numero, id_liste, messageid, stato FROM scheduler WHERE data_invio <= NOW() AND stato BETWEEN 1 AND 9";
 
 my $sth = $db->prepare($sql);
 my $numrows = $sth->execute();
 $numrows = $sth->rows;
 
-while (my ($id_scheduler, $id_ricezione, $numero, $messageid, $stato) = $sth->fetchrow_array) {
-	invio ($id_scheduler, $id_ricezione, $numero, $messageid, $stato);
+while (my ($id_scheduler, $id_ricezione, $numero, $id_liste, $messageid, $stato) = $sth->fetchrow_array) {
+	invio ($id_scheduler, $id_ricezione, $id_liste, $numero, $messageid, $stato);
 }
 
 sub invio {
 	my $id_scheduler = shift;
 	my $id_ricezione = shift;
+	my $id_liste = shift;
 	my $numero = shift;
 	my $messageid = shift;
 	my $stato_invio = shift;
 
+	# Caricamento dei dati della mail da inviare
 	my $sql = "SELECT ricezioni.id_utenze, ricezioni.oggetto, ricezioni.corpo, ricezioni.cte, ricezioni.ct, utenze.mail, utenze.sasl_pwd FROM ricezioni JOIN utenze ON ricezioni.id_utenze = utenze.id WHERE ricezioni.id = $id_ricezione";
 	my $sth = $db->prepare($sql);
 
@@ -39,7 +42,8 @@ sub invio {
 		
 		$pwd = pack ("h*", pack ("H*", $pwd));
 
-		my $sql = "SELECT id, indirizzo, nome FROM destinatari WHERE id_utenze = $id_utenze AND stato = 1 AND id_liste = 1 AND id NOT IN (SELECT id_destinatari FROM invii WHERE id_scheduler = $id_scheduler) LIMIT $numero";
+		# Ricerca degli indirizzi a cui inviare
+		my $sql = "SELECT id, indirizzo, nome FROM destinatari WHERE id_utenze = $id_utenze AND stato = 1 AND id_liste = $id_liste AND id NOT IN (SELECT id_destinatari FROM invii WHERE id_scheduler = $id_scheduler) LIMIT $numero";
 
 		$sth = $db->prepare($sql);
 		$sth->execute();

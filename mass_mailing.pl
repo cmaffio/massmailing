@@ -59,7 +59,7 @@ if ($numrows == 1) {
 	my $random = new String::Random;
 	my $messageid = $random->randregex('\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d'); # 32 numeri
 
-	$sql = "INSERT INTO scheduler (id_utenze, id_ricezioni, stato, inviate, numero, messageid) VALUES ($id, $id_ricezioni, 0, $conf{'blocco'}, 0, $messageid)";
+	$sql = "INSERT INTO scheduler (id_utenze, id_ricezioni, stato, inviate, numero, messageid) VALUES ($id, $id_ricezioni, 0, 0, $conf{'blocco'}, $messageid)";
 	$sth = $db->prepare($sql);
 	$sth->execute();
 
