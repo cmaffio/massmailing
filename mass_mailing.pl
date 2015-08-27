@@ -91,12 +91,13 @@ sub notifica {
 
 	my $oggetto = "Avviso di ricezione di una mail nel sistema di MassMailing";
 
-	my $corpo = sprintf ("In data $adesso e' stata ricevuta dall'indirizzo $indirizzo una mail di dimensione %.1f KB", $dimensione);
+	my $corpo = sprintf ("In data $adesso e' stata ricevuta dall'indirizzo $indirizzo una mail di dimensione %.1f KB\n\n", $dimensione);
 	if ($stato) {
-
+		$corpo .= "Vi invitiamo a collegarvi all'indirizzo ".$conf{'url'}." nella sezione 'Invio Massivo / Gestione Invii' per poter procedere alla pianificazione dell'invio\n\n";
 	} else {
-
+		$corpo .= "Siamo spiacenti di comunicarvi che la vostra mail eccede la dimensione massima di ".$conf{'maxdim'}." KB e non e' quindi possibile procedere alla pianificazione dell'invio\n\n";
 	}
+	$corpo .= "Cordiali saluti";
 
 	my $smtp = new Net::SMTP_auth($conf{'smtp_server'});
 	#$smtp->auth ('PLAIN', $sender, $pwd);
