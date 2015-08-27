@@ -8,8 +8,15 @@ use String::Random;
 require "$Bin/mass_mailing.conf";
 $file_log = "$Bin/mass_mailing.log";
 
+while( $_ = shift @ARGV ) {
+	$debug	= 1	if /^\-d$/;
+}
+
+
+
 # Ricerca delle mail da inviare
 my $sql = "SELECT id, id_ricezioni, numero, id_liste, messageid, stato FROM scheduler WHERE data_invio <= NOW() AND stato BETWEEN 1 AND 9";
+print "Ricerca mail:\n$sql\n\n" if ($debug);
 
 my $sth = $db->prepare($sql);
 my $numrows = $sth->execute();
@@ -29,6 +36,8 @@ sub invio {
 
 	# Caricamento dei dati della mail da inviare
 	my $sql = "SELECT ricezioni.id_utenze, ricezioni.oggetto, ricezioni.corpo, ricezioni.cte, ricezioni.ct, utenze.mail, utenze.sasl_pwd FROM ricezioni JOIN utenze ON ricezioni.id_utenze = utenze.id WHERE ricezioni.id = $id_ricezione";
+	print "Caricamento dati mail:\n$sql\n\n" if ($debug);
+
 	my $sth = $db->prepare($sql);
 
 	my $numrows = $sth->execute();
@@ -44,6 +53,7 @@ sub invio {
 
 		# Ricerca degli indirizzi a cui inviare
 		my $sql = "SELECT id, indirizzo, nome FROM destinatari WHERE id_utenze = $id_utenze AND stato = 1 AND id_liste = $id_liste AND id NOT IN (SELECT id_destinatari FROM invii WHERE id_scheduler = $id_scheduler) LIMIT $numero";
+		print "Ricerca indirizzi a cui inviare:\n$sql\n\n" if ($debug);
 
 		$sth = $db->prepare($sql);
 		$sth->execute();
@@ -51,6 +61,7 @@ sub invio {
 
 		if ($numrows == 0) {
 			my $sql = "UPDATE scheduler SET data_termine = NOW(), stato = 10 WHERE id = $id_scheduler";
+			print "Update termine invio:\n$sql\n\n" if ($debug);
 			my $sth1 = $db->prepare($sql);
 			$sth1->execute();
 
@@ -82,6 +93,7 @@ sub invio {
 				$smtp->quit;
 
 				$sql = "INSERT INTO invii (id_utenze, id_ricezione, id_destinatari, data, message_id, stato, id_scheduler) VALUES ($id_utenze, $id_ricezione, $id_destinatari, NOW(), '$messageid', 0, $id_scheduler)";
+				print "Inserimento mail inviata:\n$sql\n\n" if ($debug);
 				my $sth1 = $db->prepare($sql);
 				$sth1->execute();
 

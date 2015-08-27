@@ -106,3 +106,12 @@ sub AddSlashes {
 	$text =~ s/\\0/\\\\0/g;
 	return $text;
 }
+
+sub save_query {
+	my $query = shift;
+
+	open LOG, ">> $file_log";
+
+	print LOG "$query\n";
+	close LOG;
+}
