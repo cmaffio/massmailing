@@ -15,7 +15,9 @@ my $body;
 my $cte;
 my $ct;
 
+$dimensione = 0;
 while (<>) {
+	$dimensione += length;
 	if (/^From: (\".+\" )?<?([\w_\.-]+@[\w\.-]+)>?/) {
 		$mittente = $2;
 	}
@@ -51,7 +53,7 @@ my $numrows = $sth->execute();
 $numrows = $sth->rows;
 if ($numrows == 1) {
 	my ($id) = $sth->fetchrow_array;
-	$sql = "INSERT INTO ricezioni (id_utenze, arrivata, oggetto, corpo, cte, ct) VALUES ($id, NOW(), '$oggetto', '$body', '$cte', '$ct')";
+	$sql = "INSERT INTO ricezioni (id_utenze, arrivata, oggetto, corpo, cte, ct, dimensione) VALUES ($id, NOW(), '$oggetto', '$body', '$cte', '$ct', $dimensione)";
 	$sth = $db->prepare($sql);
 	$sth->execute();
 	my $id_ricezioni = $db->last_insert_id( undef, undef, undef, undef );
