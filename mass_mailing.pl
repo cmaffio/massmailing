@@ -54,8 +54,13 @@ while (<>) {
 }
 
 close DUMP if ($conf{'debug_mailing'});
-notifica ("$mittente");
 
+if ($conf{'maxdim'} < $dimensione/1024 ) {
+	notifica ("$mittente", 0, $dimensione/1024);
+	exit;
+}
+
+notifica ("$mittente", 1, $dimensione/1024);
 
 my $sql = "SELECT id FROM utenze WHERE mail = '$mittente'";
 my $sth = $db->prepare($sql);
@@ -74,14 +79,26 @@ if ($numrows == 1) {
 	$sql = "INSERT INTO scheduler (id_utenze, id_ricezioni, stato, inviate, numero, messageid) VALUES ($id, $id_ricezioni, 0, 0, $conf{'blocco'}, $messageid)";
 	$sth = $db->prepare($sql);
 	$sth->execute();
-
 }
 
 sub notifica {
 	my $indirizzo = shift;
+	my $stato = shift;
+	my $dimensione = shift;
 
-	my $oggetto = "Ogetto di test";
-	my $corpo = "Questa e' una mail di prova\nvediamo cosa ne esce\n\nCiao";
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+	my $adesso = sprintf("%02d.%02d.%04d %02d:02d:%02d", $mday, $mon+2, $year+1970, $hour, $min, $sec);
+
+	my $oggetto = "Avviso di ricezione di una mail nel sistema di MassMailing";
+
+	my $corpo = "In data $adesso e' stata ricevuta dall'indirizzo $indirizzo una mail di dimension $dimensione";
+	if ($stato) {
+
+	} else {
+
+	}
+
+
 
 	my $smtp = new Net::SMTP_auth($conf{'smtp_server'});
 	#$smtp->auth ('PLAIN', $sender, $pwd);
